@@ -10,5 +10,5 @@ class Charger:
     charging_rate: float = 0.0 # [%/s]
 
 class Location:
+    name: str
     chargers: list[Charger]
-
