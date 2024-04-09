@@ -8,7 +8,13 @@ class Charger:
     status: Status = Status.NO_CAR
     charge_percentage: float = 0.0 # [%] 0.0 - 100.0
     charging_rate: float = 0.0 # [%/s]
+    
+    def toggle_status(self):
+        if self.status == Charger.Status.NO_CAR:
+            self.status = Charger.Status.CHARGING
+        else: self.status = Charger.Status.NO_CAR
 
 class Location:
-    name: str
-    chargers: list[Charger]
+    def __init__(self, name: str):
+        self.name: str = name
+        self.chargers: list[Charger] = [Charger() for _ in range(5)]
