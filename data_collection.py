@@ -34,17 +34,29 @@ def get_charger_pixels_from_top_left_pixel(top_left_pixel):
 
 
         
+# def render_charger(charger):
+#     render_color = Color.green
+#     if charger.status == Charger.Status.CHARGING:
+#         render_color = Color.red
+#     sense.set_pixel(0, 0, render_color)
+#     sense.set_pixel(0, 1, render_color)
+#     sense.set_pixel(0, 2, render_color)
+#     sense.set_pixel(1, 0, render_color)
+#     sense.set_pixel(1, 1, render_color)
+#     sense.set_pixel(1, 2, render_color)
+
 def render_charger(charger):
     render_color = Color.green
     if charger.status == Charger.Status.CHARGING:
         render_color = Color.red
-    sense.set_pixel(0, 0, render_color)
-    sense.set_pixel(0, 1, render_color)
-    sense.set_pixel(0, 2, render_color)
-    sense.set_pixel(1, 0, render_color)
-    sense.set_pixel(1, 1, render_color)
-    sense.set_pixel(1, 2, render_color)
-
+    
+    charger_top_left_pixel = [(charger.charger_number > 0)*1 + charger.charger_number*2, 
+                        5-(5*(charger.charger_number < 3))]
+    
+    charger_pixels = get_charger_pixels_from_top_left_pixel(charger_top_left_pixel)
+    
+    for pixel in charger_pixels:
+        sense.set_pixel(pixel, render_color)
 
 def render_led_matrix(location):
     for charger in location.chargers:
