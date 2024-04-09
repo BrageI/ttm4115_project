@@ -21,4 +21,4 @@ class Charger:
 class Location:
     def __init__(self, name: str):
         self.name: str = name
-        self.chargers: list[Charger] = [Charger(i) for i in range(5)]
+        self.chargers: list[Charger] = [Charger(i) for i in range(6)]
