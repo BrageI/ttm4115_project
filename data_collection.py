@@ -15,6 +15,22 @@ class Color:
 #     else: 
 #         color = Color.red
 
+def get_charger_pixels_from_top_left_pixel(top_left_pixel):
+    pixel_array = []
+    selected_pixel = top_left_pixel
+    pixel_array.append(selected_pixel)
+    selected_pixel[0]+=1
+    pixel_array.append(selected_pixel)
+    selected_pixel[0]+=1
+    pixel_array.append(selected_pixel)
+    selected_pixel[1]+=1
+    pixel_array.append(selected_pixel)
+    selected_pixel[1]-=1
+    pixel_array.append(selected_pixel)
+    selected_pixel[1]-=1
+    pixel_array.append(selected_pixel)
+    return pixel_array
+    
 
 
         
