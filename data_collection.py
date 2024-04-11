@@ -53,7 +53,45 @@ def park_car(location):
             location.chargers[free_charger_number].toggle_status()
     render_led_matrix(location)
         
-#location.chargers[0].status = Charger.Status.NO_CAR
+#Initial transition
+t0 = {
+    'source': 'initial',
+    'target': 'no_car'
+}
+
+#Transition from no_car to charging
+t1 = {
+    'trigger': 'start_charging',
+    'source': 'no_car',
+    'target': 'charging'
+}
+
+#Transition from charging to no_car
+t2 = {
+    'trigger': 'charge_complete',
+    'source': 'charging',
+    'target': 'no_car'
+}
+
+#Trigger to increment charge in charing state
+t3 = {
+    'trigger': 't',
+    'source': 'charging',
+    'target': 'charging',
+    'effect': 'increment_charge'
+}
+
+no_car = {
+    'name': 'no_car',
+    'entry': 'toggle_status'
+}
+
+charging = {
+    'name': 'charging',
+    'entry': 'toggle_status; start_timer("t", 1000)'
+}
+
+
 
 sense.clear()
 render_led_matrix(location)

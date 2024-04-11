@@ -17,6 +17,11 @@ class Charger:
         if self.status == Charger.Status.NO_CAR:
             self.status = Charger.Status.CHARGING
         else: self.status = Charger.Status.NO_CAR
+        
+    def increment_charge(self):
+        self.charge_percentage += self.charging_rate
+        if self.charge_percentage >= 100.0:
+            self.stm.send('charge_complete')
 
 class Location:
     def __init__(self, name: str):
