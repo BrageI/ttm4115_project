@@ -1,4 +1,5 @@
 from __future__ import annotations
+from stmpy import Machine, Driver
 
 class Charger:
     class Status:

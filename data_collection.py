@@ -1,5 +1,6 @@
 from sense_hat import SenseHat
 from shared.charger_data import *
+from stmpy import Machine, Driver
 
 sense = SenseHat()
 
@@ -50,7 +51,7 @@ def find_free_charger_number(location):
 def park_car(location):
     free_charger_number = find_free_charger_number(location)
     if free_charger_number != -1:
-            location.chargers[free_charger_number].toggle_status()
+            location.chargers[free_charger_number].stm.send("start_charging")
     render_led_matrix(location)
         
 #Initial transition
@@ -81,6 +82,8 @@ t3 = {
     'effect': 'increment_charge'
 }
 
+#States
+
 no_car = {
     'name': 'no_car',
     'entry': 'toggle_status'
@@ -90,6 +93,10 @@ charging = {
     'name': 'charging',
     'entry': 'toggle_status; start_timer("t", 1000)'
 }
+
+for charger in location.chargers:
+    machine = Machine(name='charger', transitions=[t0, t1, t2, t3], obj=charger, states=[no_car, charging])
+    charger.stm = machine
 
 
 
