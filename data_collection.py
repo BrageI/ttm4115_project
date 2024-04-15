@@ -22,19 +22,13 @@ def render_charger(charger):
     render_color = Color.green
     if charger.status == Charger.Status.CHARGING:
         render_color = Color.red
-    
-
+        
     charger_top_left_pixel = [(charger.charger_number % 3)*3, (charger.charger_number//3)*5]
-    
-    #print("Top left: ", charger_top_left_pixel)
-    
     charger_pixels = get_charger_pixels_from_top_left_pixel(charger_top_left_pixel)
     
-    #print("Charger pixels: ", charger_pixels)
-    
     for pixel in charger_pixels:
-        #print("Pixel position: ", pixel[0], pixel[1])
         sense.set_pixel(pixel[0], pixel[1], render_color)
+        
 
 def render_led_matrix(location):
     for charger in location.chargers:
@@ -86,19 +80,23 @@ t3 = {
 
 no_car = {
     'name': 'no_car',
-    'entry': 'toggle_status'
+    'exit': 'toggle_status'
 }
 
 charging = {
     'name': 'charging',
-    'entry': 'toggle_status; start_timer("t", 1000)'
+    'entry': 'start_timer("t", 1000)',
+    'exit': 'toggle_status'
 }
+
+driver = Driver()
 
 for charger in location.chargers:
     machine = Machine(name='charger', transitions=[t0, t1, t2, t3], obj=charger, states=[no_car, charging])
     charger.stm = machine
-
-
+    driver.add_machine(machine)
+    
+driver.start()
 
 sense.clear()
 render_led_matrix(location)

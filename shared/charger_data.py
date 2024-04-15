@@ -19,6 +19,9 @@ class Charger:
             self.status = Charger.Status.CHARGING
         else: self.status = Charger.Status.NO_CAR
         
+    def set_status(self, new_status):
+        self.status = new_status
+        
     def increment_charge(self):
         self.charge_percentage += self.charging_rate
         if self.charge_percentage >= 100.0:
