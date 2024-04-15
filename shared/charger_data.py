@@ -1,7 +1,24 @@
 from __future__ import annotations
 from stmpy import Machine, Driver
+from sense_hat import SenseHat
+import random
+
+def get_charger_pixels_from_top_left_pixel(top_left_pixel):
+    x, y = top_left_pixel
+    # Define the relative movements from the top-left pixel
+    movements = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
+    # Apply each movement to the top-left pixel to get each position
+    pixel_array = [(x + dx, y + dy) for dx, dy in movements]
+    return pixel_array
+
+class Color:
+    red = [255, 0, 0] #Color for occupied charger
+    green = [0, 255, 0] #Color for free charger
 
 class Charger:
+    location: Location
+    
+    sense: SenseHat 
     stm: Machine
 
     class Status:
@@ -11,15 +28,24 @@ class Charger:
     status: Status = Status.NO_CAR
     charger_number: int 
     charge_percentage: float = 20.0 # [%] 0.0 - 100.0
-    charging_rate: float = 1.0 # [%/s]
+    charging_rate: float = 8.0 # [%/s]
     
-    def __init__(self, number):
+    def __init__(self, number, location: Location, sense: SenseHat):
         self.charger_number = number
+        self.location = location
+        self.sense = sense
+
+    def read_charging_parameters(self):
+        self.charge_percentage = random.uniform(10.0, 40.0)
+        self.charging_rate = random.uniform(1.0, 2.0)
     
     def toggle_status(self):
         if self.status == Charger.Status.NO_CAR:
             self.status = Charger.Status.CHARGING
-        else: self.status = Charger.Status.NO_CAR
+        else:
+            self.status = Charger.Status.NO_CAR
+            self.charge_percentage = 0.0
+        self.render()
         
     def set_status(self, new_status):
         self.status = new_status
@@ -27,15 +53,49 @@ class Charger:
     def increment_charge(self):
         self.charge_percentage += self.charging_rate
         if self.charge_percentage >= 100.0:
+            self.charge_percentage = 100.0
             self.stm.send('charge_complete')
+        print(f"Charger {self.charger_number}: at {self.charge_percentage}%")
+
+    def render(self):
+        render_color = Color.green
+        if self.status == Charger.Status.CHARGING:
+            render_color = Color.red
+            
+        charger_top_left_pixel = [(self.charger_number % 3)*3, (self.charger_number//3)*5]
+        charger_pixels = get_charger_pixels_from_top_left_pixel(charger_top_left_pixel)
+        
+        for pixel in charger_pixels:
+            self.sense.set_pixel(pixel[0], pixel[1], render_color)
 
 class Location:
+    sense: SenseHat
+
     stm: Machine
-    def __init__(self, name: str):
+    def __init__(self, name: str, sense: SenseHat):
         self.name: str = name
-        self.chargers: list[Charger] = [Charger(i) for i in range(6)]
+        self.sense = sense
+        self.chargers: list[Charger] = [Charger(i, self, sense) for i in range(6)]
 
     
     def increment_charge(self):
         for charger in self.chargers:
             charger.stm.send('trigger_charging_increment')
+
+    def render(self):
+        for charger in self.chargers:
+            charger.render()
+            
+    def find_free_charger_number(self):
+        free_charger_number = 0
+        for charger in self.chargers:
+            if charger.status == Charger.Status.NO_CAR:
+                return free_charger_number
+            free_charger_number+=1
+        return -1
+
+    def park_car(self):
+        free_charger_number = self.find_free_charger_number()
+        if free_charger_number != -1:
+            self.chargers[free_charger_number].stm.send("start_charging")
+            print("Parking car at spot", free_charger_number)
