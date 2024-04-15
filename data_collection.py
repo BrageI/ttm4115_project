@@ -45,56 +45,53 @@ def find_free_charger_number(location):
 def park_car(location):
     free_charger_number = find_free_charger_number(location)
     if free_charger_number != -1:
-            location.chargers[free_charger_number].stm.send("start_charging")
+        location.chargers[free_charger_number].stm.send("start_charging")
+        print("Parking car at spot", free_charger_number)
     render_led_matrix(location)
-        
-#Initial transition
-t0 = {
-    'source': 'initial',
-    'target': 'no_car'
-}
 
-#Transition from no_car to charging
-t1 = {
-    'trigger': 'start_charging',
-    'source': 'no_car',
-    'target': 'charging'
-}
-
-#Transition from charging to no_car
-t2 = {
-    'trigger': 'charge_complete',
-    'source': 'charging',
-    'target': 'no_car'
-}
-
-#Trigger to increment charge in charing state
-t3 = {
-    'trigger': 't',
-    'source': 'charging',
-    'target': 'charging',
-    'effect': 'increment_charge'
-}
-
-#States
-
-no_car = {
-    'name': 'no_car',
-    'exit': 'toggle_status'
-}
-
-charging = {
-    'name': 'charging',
-    'entry': 'start_timer("t", 1000)',
-    'exit': 'toggle_status'
-}
 
 driver = Driver()
 
+location.stm = Machine(
+    name='charger',
+    transitions=[{
+        'source': 'initial',
+        'target': 'provide_power'
+    }],
+    obj=location,
+    states=[{
+        'name': 'provide_power',
+        'entry': 'start_timer("trigger_charging_increment", 1000)',
+        'trigger_charging_increment': 'increment_charge; start_timer("trigger_charging_increment", 1000)'
+    }])
+
+driver.add_machine(location.stm)
+
 for charger in location.chargers:
-    machine = Machine(name='charger', transitions=[t0, t1, t2, t3], obj=charger, states=[no_car, charging])
-    charger.stm = machine
-    driver.add_machine(machine)
+    charger.stm = Machine(
+        name='charger',
+        transitions=[{
+            'source': 'initial',
+            'target': 'no_car'
+        }, {
+            'trigger': 'start_charging',
+            'source': 'no_car',
+            'target': 'charging'
+        }, {
+            'trigger': 'charge_complete',
+            'source': 'charging',
+            'target': 'no_car'
+        }],
+        obj=charger,
+        states=[{
+            'name': 'no_car',
+            'exit': 'toggle_status'
+        }, {
+            'name': 'charging',
+            'trigger_charging_increment': 'increment_charge',
+            'exit': 'toggle_status'
+        }])
+    driver.add_machine(charger.stm)
     
 driver.start()
 

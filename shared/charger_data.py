@@ -2,14 +2,16 @@ from __future__ import annotations
 from stmpy import Machine, Driver
 
 class Charger:
+    stm: Machine
+
     class Status:
         NO_CAR = 0
         CHARGING = 1
 
     status: Status = Status.NO_CAR
     charger_number: int 
-    charge_percentage: float = 0.0 # [%] 0.0 - 100.0
-    charging_rate: float = 0.0 # [%/s]
+    charge_percentage: float = 20.0 # [%] 0.0 - 100.0
+    charging_rate: float = 1.0 # [%/s]
     
     def __init__(self, number):
         self.charger_number = number
@@ -28,6 +30,12 @@ class Charger:
             self.stm.send('charge_complete')
 
 class Location:
+    stm: Machine
     def __init__(self, name: str):
         self.name: str = name
         self.chargers: list[Charger] = [Charger(i) for i in range(6)]
+
+    
+    def increment_charge(self):
+        for charger in self.chargers:
+            charger.stm.send('trigger_charging_increment')
