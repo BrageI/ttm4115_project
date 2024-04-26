@@ -27,5 +27,9 @@ function onConnectionLost(responseObject) {
 function onMessageArrived(message) {
     console.log("Message arrived:", message.payloadString);
     // Display message on the webpage
-    document.getElementById("mqtt-data").innerHTML = message.payloadString;
+    var data = JSON.parse(message.payloadString);
+    document.getElementById("mqtt-available").innerHTML = "Available chargers: " + data["available_chargers"]
+    document.getElementById("mqtt-total").innerHTML = "Total amount of chargers: " + data["total_chargers"]
+    document.getElementById("mqtt-time").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+    // document.getElementById("mqtt-data").innerHTML = message.payloadString;
 }
