@@ -29,6 +29,7 @@ function onMessageArrived(message) {
     // Display message on the webpage
     var data = JSON.parse(message.payloadString);
     document.getElementById("mqtt-available").innerHTML = "Available chargers: " + data["available_chargers"]
+    document.getElementById("mqtt-available-arrival").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
     document.getElementById("mqtt-total").innerHTML = "Total amount of chargers: " + data["total_chargers"]
     document.getElementById("mqtt-time").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
     // document.getElementById("mqtt-data").innerHTML = message.payloadString;
