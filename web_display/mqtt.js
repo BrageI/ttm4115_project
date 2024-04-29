@@ -33,21 +33,21 @@ function onMessageArrived(message) {
         document.getElementById("mqtt-available-0").innerHTML = "Available chargers: " + data["available_chargers"]
         document.getElementById("mqtt-available-arrival-0").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
         document.getElementById("mqtt-total-0").innerHTML = "Total amount of chargers: " + data["total_chargers"]
-        document.getElementById("mqtt-time-0").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+        document.getElementById("mqtt-time-0").innerHTML = "Time until arrival: " + data ["time_until_arrival"] + " minutes"
     }
     if (data["location_id"] === 1) {
         document.getElementById("mqtt-location-1").innerHTML = data["location_name"]
         document.getElementById("mqtt-available-1").innerHTML = "Available chargers: " + data["available_chargers"]
         document.getElementById("mqtt-available-arrival-1").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
         document.getElementById("mqtt-total-1").innerHTML = "Total amount of chargers: " + data["total_chargers"]
-        document.getElementById("mqtt-time-1").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+        document.getElementById("mqtt-time-1").innerHTML = "Time until arrival: " + data ["time_until_arrival"] + " minutes"
     }
     if (data["location_id"] === 2) {
         document.getElementById("mqtt-location-2").innerHTML = data["location_name"]
         document.getElementById("mqtt-available-2").innerHTML = "Available chargers: " + data["available_chargers"]
         document.getElementById("mqtt-available-arrival-2").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
         document.getElementById("mqtt-total-2").innerHTML = "Total amount of chargers: " + data["total_chargers"]
-        document.getElementById("mqtt-time-2").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+        document.getElementById("mqtt-time-2").innerHTML = "Time until arrival: " + data ["time_until_arrival"] + " minutes"
     }
     // document.getElementById("mqtt-data").innerHTML = message.payloadString;
 }

@@ -34,12 +34,10 @@ class Server:
             "available_chargers": available_now,
             "available_chargers_arrival": available_on_arrival,
             "total_chargers": len(location.chargers),
-            "time_until_arrival": 15.0
+            "time_until_arrival": 10+5*location.id,
         }
 
         self.mqtt_client.publish(f"ttm4115/gruppe21/fromserver", json.dumps(out))
-    
-        
 
 
 server = Server()
