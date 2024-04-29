@@ -13,7 +13,7 @@ client.connect({onSuccess:onConnect});
 function onConnect() {
     console.log("Connected");
     // Subscribe to ttm4115/gruppe21
-    client.subscribe("ttm4115/gruppe21");
+    client.subscribe("ttm4115/gruppe21/fromserver");
 }
 
 // Called when the client loses its connection
