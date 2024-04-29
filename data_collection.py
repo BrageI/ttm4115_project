@@ -15,8 +15,9 @@ location.stm = Machine(
     states=[
         {
             "name": "provide_power",
-            "entry": 'start_timer("trigger_charging_increment", 1000)',
+            "entry": 'start_timer("trigger_charging_increment", 1000); start_timer("send_data", 1000)',
             "trigger_charging_increment": 'increment_charge; start_timer("trigger_charging_increment", 1000)',
+            "send_data": 'send_data; start_timer("send_data", 1000)',
         }
     ],
 )

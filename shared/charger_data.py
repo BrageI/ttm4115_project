@@ -1,8 +1,12 @@
 from __future__ import annotations
-from stmpy import Machine, Driver
-from sense_hat import SenseHat
+import pickle
 import random
 
+from sense_hat import SenseHat
+from stmpy import Machine
+import paho.mqtt.client as mqtt
+
+import shared.mqtt_opts
 
 def get_charger_pixels_from_top_left_pixel(top_left_pixel):
     x, y = top_left_pixel
@@ -91,6 +95,13 @@ class Location:
         self.sense = sense
         self.chargers: list[Charger] = [Charger(i, self, sense) for i in range(6)]
 
+        self.mqtt_client = mqtt.Client()
+        self.mqtt_client.on_connect = self.on_mqtt_connect
+        self.mqtt_client.connect(shared.mqtt_opts.BROKER, shared.mqtt_opts.PORT)
+
+    def on_mqtt_connect(self, client, userdata, flags, rc):
+        print("on_mqtt_connect(): {}".format(mqtt.connack_string(rc)))
+
     def increment_charge(self):
         for charger in self.chargers:
             charger.stm.send("trigger_charging_increment")
@@ -112,3 +123,10 @@ class Location:
         if free_charger_number != -1:
             self.chargers[free_charger_number].stm.send("start_charging")
             print("Parking car at spot", free_charger_number)
+
+    def send_data(self):
+        out = list()
+        for charger in self.chargers:
+            out.append(charger.data)
+        self.mqtt_client.publish(f"ttm4115/gruppe21/fromstation", pickle.dumps(out))
+        
