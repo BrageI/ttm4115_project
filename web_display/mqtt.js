@@ -28,9 +28,23 @@ function onMessageArrived(message) {
     console.log("Message arrived:", message.payloadString);
     // Display message on the webpage
     var data = JSON.parse(message.payloadString);
-    document.getElementById("mqtt-available").innerHTML = "Available chargers: " + data["available_chargers"]
-    document.getElementById("mqtt-available-arrival").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
-    document.getElementById("mqtt-total").innerHTML = "Total amount of chargers: " + data["total_chargers"]
-    document.getElementById("mqtt-time").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+    if (data["location_id"] === 0) {
+        document.getElementById("mqtt-available-0").innerHTML = "Available chargers: " + data["available_chargers"]
+        document.getElementById("mqtt-available-arrival-0").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
+        document.getElementById("mqtt-total-0").innerHTML = "Total amount of chargers: " + data["total_chargers"]
+        document.getElementById("mqtt-time-0").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+    }
+    if (data["location_id"] === 1) {
+        document.getElementById("mqtt-available-1").innerHTML = "Available chargers: " + data["available_chargers"]
+        document.getElementById("mqtt-available-arrival-1").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
+        document.getElementById("mqtt-total-1").innerHTML = "Total amount of chargers: " + data["total_chargers"]
+        document.getElementById("mqtt-time-1").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+    }
+    if (data["location_id"] === 2) {
+        document.getElementById("mqtt-available-2").innerHTML = "Available chargers: " + data["available_chargers"]
+        document.getElementById("mqtt-available-arrival-2").innerHTML = "Estimated available chargers on arrival: " + data["available_chargers_arrival"]
+        document.getElementById("mqtt-total-2").innerHTML = "Total amount of chargers: " + data["total_chargers"]
+        document.getElementById("mqtt-time-2").innerHTML = "Time until arrival: " + data ["time_until_arrival"]
+    }
     // document.getElementById("mqtt-data").innerHTML = message.payloadString;
 }
