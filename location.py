@@ -11,7 +11,7 @@ driver = Driver()
 locations: list[Location] = []
 
 for location_id in range(Location.amount):
-    location = Location(location_id, f"Location {location_id}", sense)
+    location = Location(location_id, f"Location {location_id+1}", sense)
 
     location.stm = Machine(
         name=f"location_{location_id}",

@@ -135,11 +135,13 @@ class Location:
             charger.render()
 
     def find_free_charger_id(self):
-        free_charger_id = 0
+        free_charger_ids: list[int] = []
+
         for charger in self.chargers:
             if charger.data.status == Charger.Status.NO_CAR:
-                return free_charger_id
-            free_charger_id += 1
+                free_charger_ids.append(charger.data.id)
+        if len(free_charger_ids) > 0:
+            return random.choice(free_charger_ids)
         return -1
 
     def park_car(self):
