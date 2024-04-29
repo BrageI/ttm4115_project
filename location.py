@@ -1,57 +1,80 @@
-from sense_hat import InputEvent, DIRECTION_MIDDLE
+from sense_hat import InputEvent, DIRECTION_MIDDLE, DIRECTION_LEFT, DIRECTION_RIGHT
 from shared.charger_data import *
 from stmpy import Machine, Driver
 
 sense = SenseHat()
 
-location = Location("Location 1", sense)
+
 
 driver = Driver()
 
-location.stm = Machine(
-    name="charger",
-    transitions=[{"source": "initial", "target": "provide_power"}],
-    obj=location,
-    states=[
-        {
-            "name": "provide_power",
-            "entry": 'start_timer("trigger_charging_increment", 1000); start_timer("send_data", 1000)',
-            "trigger_charging_increment": 'increment_charge; start_timer("trigger_charging_increment", 1000)',
-            "send_data": 'send_data; start_timer("send_data", 1000)',
-        }
-    ],
-)
+locations: list[Location] = []
 
-driver.add_machine(location.stm)
+for location_id in range(Location.amount):
+    location = Location(location_id, f"Location {location_id}", sense)
 
-for charger in location.chargers:
-    charger.stm = Machine(
+    location.stm = Machine(
         name="charger",
-        transitions=[
-            {"source": "initial", "target": "no_car"},
-            {"trigger": "start_charging", "source": "no_car", "target": "charging"},
-            {"trigger": "charge_complete", "source": "charging", "target": "no_car"},
-        ],
-        obj=charger,
+        transitions=[{"source": "initial", "target": "provide_power"}],
+        obj=location,
         states=[
-            {"name": "no_car", "exit": "toggle_status"},
             {
-                "name": "charging",
-                "entry": "read_charging_parameters",
-                "trigger_charging_increment": "increment_charge",
-                "exit": "toggle_status",
-            },
+                "name": "provide_power",
+                "entry": f'start_timer("trigger_charging_increment{location_id}", 1000); start_timer("send_data{location_id}", 1000)',
+                f"trigger_charging_increment{location_id}": f'increment_charge; start_timer("trigger_charging_increment{location_id}", 1000)',
+                f"send_data{location_id}": f'send_data; start_timer("send_data{location_id}", 1000)',
+            }
         ],
     )
-    driver.add_machine(charger.stm)
+
+
+    for charger in location.chargers:
+        charger.stm = Machine(
+            name="charger",
+            transitions=[
+                {"source": "initial", "target": "no_car"},
+                {"trigger": "start_charging", "source": "no_car", "target": "charging"},
+                {"trigger": "charge_complete", "source": "charging", "target": "no_car"},
+            ],
+            obj=charger,
+            states=[
+                {"name": "no_car", "exit": "toggle_status"},
+                {
+                    "name": "charging",
+                    "entry": "read_charging_parameters",
+                    f"trigger_charging_increment{location_id}": "increment_charge",
+                    "exit": "toggle_status",
+                },
+            ],
+        )
+        driver.add_machine(charger.stm)
+
+    driver.add_machine(location.stm)
+    locations.append(location)
 
 driver.start()
-
 sense.clear()
-location.render()
+
+selected_location_id = 0
+
+locations[selected_location_id].is_rendering = True
+locations[selected_location_id].render()
 
 while True:
     event: InputEvent
     for event in sense.stick.get_events():
-        if event.direction == DIRECTION_MIDDLE and event.action == "released":
-            location.park_car()
+        if event.action == "released":
+            if event.direction == DIRECTION_MIDDLE:
+                locations[selected_location_id].park_car()
+
+            if event.direction == DIRECTION_LEFT:
+                locations[selected_location_id].is_rendering = False
+                selected_location_id = (selected_location_id - 1) % Location.amount
+                locations[selected_location_id].is_rendering = True
+                locations[selected_location_id].render()
+
+            elif event.direction == DIRECTION_RIGHT:
+                locations[selected_location_id].is_rendering = False
+                selected_location_id = (selected_location_id + 1) % Location.amount
+                locations[selected_location_id].is_rendering = True
+                locations[selected_location_id].render()

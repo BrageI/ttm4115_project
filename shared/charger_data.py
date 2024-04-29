@@ -20,6 +20,7 @@ def get_charger_pixels_from_top_left_pixel(top_left_pixel):
 class Color:
     red = [255, 0, 0]  # Color for occupied charger
     green = [0, 255, 0]  # Color for free charger
+    blue = [0, 0, 255]  # For location indicator
 
 
 
@@ -35,14 +36,14 @@ class Charger:
 
 
     class Data:
-        charger_number: int
+        id: int
         status: Charger.Status
         charge_percentage: float = 20.0  # [%] 0.0 - 100.0
         charging_rate: float = 8.0  # [%/s]
 
     def __init__(self, number, location: Location, sense: SenseHat):
         self.data = self.Data()
-        self.data.charger_number = number
+        self.data.id = number
         self.data.status = Charger.Status.NO_CAR
 
         self.location = location
@@ -68,16 +69,19 @@ class Charger:
         if self.data.charge_percentage >= 100.0:
             self.data.charge_percentage = 100.0
             self.stm.send("charge_complete")
-        print(f"Charger {self.data.charger_number}: at {self.data.charge_percentage}%")
+        print(f"On location {self.location.id}, charger {self.data.id}: at {self.data.charge_percentage}%")
 
     def render(self):
+        if not self.location.is_rendering:
+            return
+        
         render_color = Color.green
         if self.data.status == Charger.Status.CHARGING:
             render_color = Color.red
 
         charger_top_left_pixel = [
-            (self.data.charger_number % 3) * 3,
-            (self.data.charger_number // 3) * 5,
+            (self.data.id % 3) * 3,
+            (self.data.id // 3) * 5,
         ]
         charger_pixels = get_charger_pixels_from_top_left_pixel(charger_top_left_pixel)
 
@@ -86,14 +90,23 @@ class Charger:
 
 
 class Location:
+    amount = 8
+
     sense: SenseHat
 
     stm: Machine
 
-    def __init__(self, name: str, sense: SenseHat):
+    class Data:
+        name: str
+        chargers: list[Charger.Data]
+
+    def __init__(self, id: int, name: str, sense: SenseHat):
+        self.id = id
         self.name: str = name
         self.sense = sense
         self.chargers: list[Charger] = [Charger(i, self, sense) for i in range(6)]
+
+        self.is_rendering = False
 
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_connect = self.on_mqtt_connect
@@ -107,26 +120,37 @@ class Location:
             charger.stm.send("trigger_charging_increment")
 
     def render(self):
+        if not self.is_rendering:
+            return
+        
+        for i in range(Location.amount):
+            color = [0,0,0]
+            if i <= self.id:
+                color = Color.blue
+            self.sense.set_pixel(i, 3, color)
+            self.sense.set_pixel(i, 4, color)
+
         for charger in self.chargers:
             charger.render()
 
-    def find_free_charger_number(self):
-        free_charger_number = 0
+    def find_free_charger_id(self):
+        free_charger_id = 0
         for charger in self.chargers:
             if charger.data.status == Charger.Status.NO_CAR:
-                return free_charger_number
-            free_charger_number += 1
+                return free_charger_id
+            free_charger_id += 1
         return -1
 
     def park_car(self):
-        free_charger_number = self.find_free_charger_number()
-        if free_charger_number != -1:
-            self.chargers[free_charger_number].stm.send("start_charging")
-            print("Parking car at spot", free_charger_number)
+        free_charger_id = self.find_free_charger_id()
+        if free_charger_id != -1:
+            self.chargers[free_charger_id].stm.send("start_charging")
+            print(f"Location {self.id}, Parking car at spot", free_charger_id)
 
     def send_data(self):
-        out = list()
+        out = self.Data()
+        out.name = self.name
         for charger in self.chargers:
-            out.append(charger.data)
+            out.chargers.append(charger.data)
         self.mqtt_client.publish(f"ttm4115/gruppe21/fromstation", pickle.dumps(out))
         

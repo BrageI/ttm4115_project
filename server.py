@@ -2,7 +2,7 @@ import pickle
 import json
 
 import paho.mqtt.client as mqtt
-from shared.charger_data import Charger
+from shared.charger_data import Charger, Location
 
 import shared.mqtt_opts
 
@@ -20,18 +20,19 @@ class Server:
 
     def on_mqtt_message(self, client, userdata, msg: mqtt.MQTTMessage):
         print("on_mqtt_message(): topic: {}".format(msg.topic))
-        parsed: list[Charger.Data] = pickle.loads(msg.payload)
+        location: Location.Data = pickle.loads(msg.payload)
         
-        available_now = len([0 for c in parsed if c.status == Charger.Status.NO_CAR])
+        available_now = len([0 for c in location.chargers if c.status == Charger.Status.NO_CAR])
         available_on_arrival = available_now
-        for charger in parsed:
+        for charger in location.chargers:
             if charger.status == Charger.Status.CHARGING and charger.charge_percentage > 75.0:
                 available_on_arrival += 1
 
         out = {
+            "location_name": location.name,
             "available_chargers": available_now,
             "available_chargers_arrival": available_on_arrival,
-            "total_chargers": len(parsed),
+            "total_chargers": len(location.chargers),
             "time_until_arrival": 15.0
         }
 
