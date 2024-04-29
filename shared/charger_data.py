@@ -98,6 +98,7 @@ class Location:
 
     class Data:
         name: str
+        id: int
         chargers: list[Charger.Data]
 
     def __init__(self, id: int, name: str, sense: SenseHat):
@@ -150,6 +151,8 @@ class Location:
     def send_data(self):
         out = self.Data()
         out.name = self.name
+        out.id = self.id
+        out.chargers = []
         for charger in self.chargers:
             out.chargers.append(charger.data)
         self.mqtt_client.publish(f"ttm4115/gruppe21/fromstation", pickle.dumps(out))

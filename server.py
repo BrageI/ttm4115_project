@@ -30,6 +30,7 @@ class Server:
 
         out = {
             "location_name": location.name,
+            "location_id": location.id,
             "available_chargers": available_now,
             "available_chargers_arrival": available_on_arrival,
             "total_chargers": len(location.chargers),
