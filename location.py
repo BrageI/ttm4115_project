@@ -14,23 +14,24 @@ for location_id in range(Location.amount):
     location = Location(location_id, f"Location {location_id}", sense)
 
     location.stm = Machine(
-        name="charger",
+        name=f"location_{location_id}",
         transitions=[{"source": "initial", "target": "provide_power"}],
         obj=location,
         states=[
             {
                 "name": "provide_power",
-                "entry": f'start_timer("trigger_charging_increment{location_id}", 1000); start_timer("send_data{location_id}", 1000)',
-                f"trigger_charging_increment{location_id}": f'increment_charge; start_timer("trigger_charging_increment{location_id}", 1000)',
-                f"send_data{location_id}": f'send_data; start_timer("send_data{location_id}", 1000)',
+                "entry": f'start_timer("trigger_charging_increment", 1000); start_timer("send_data", 1000)',
+                f"trigger_charging_increment": f'increment_charge; start_timer("trigger_charging_increment", 1000)',
+                f"send_data": f'send_data; start_timer("send_data", 1000)',
             }
         ],
     )
+    driver.add_machine(location.stm)
 
 
-    for charger in location.chargers:
+    for i, charger in enumerate(location.chargers):
         charger.stm = Machine(
-            name="charger",
+            name=f"charger_{location_id}_{i}",
             transitions=[
                 {"source": "initial", "target": "no_car"},
                 {"trigger": "start_charging", "source": "no_car", "target": "charging"},
@@ -42,17 +43,18 @@ for location_id in range(Location.amount):
                 {
                     "name": "charging",
                     "entry": "read_charging_parameters",
-                    f"trigger_charging_increment{location_id}": "increment_charge",
+                    f"trigger_charging_increment": "increment_charge",
                     "exit": "toggle_status",
                 },
             ],
         )
         driver.add_machine(charger.stm)
 
-    driver.add_machine(location.stm)
     locations.append(location)
 
 driver.start()
+#driver.start()
+#driver.start()
 sense.clear()
 
 selected_location_id = 0
