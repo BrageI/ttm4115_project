@@ -11,7 +11,7 @@ python3 server.py
 ```
 on the other Raspberry Pi. This requires the python3 packages `stmypy`, and `paho-mqtt` to be installed. Finally, to run the user interface, run:
 ```bash
-python3 web_display/Skeleton_WebServer.py
+python3 web_display/webserver.py 
 ```
 on a personal machine and enter the link [http://localhost:12000/web_display/index.html](http://localhost:12000/web_display/index.html) in a web browser. All of these require an internet connection in some way for MQTT to work.
 
