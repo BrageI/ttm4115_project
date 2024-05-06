@@ -7,7 +7,7 @@ serverSocket.listen(1)
 
 try:
 	while True:
-		print('Ready to serve...')
+		print('Ready.')
 		connectionSocket, addr = serverSocket.accept()
 		try:
 			message =  connectionSocket.recv(1024).decode()
@@ -18,7 +18,7 @@ try:
 			connectionSocket.send(("HTTP/1.1 200 OK\r\n\r\n").encode())
 			
 			response = outputdata + "\r\n"
-			connectionSocket.send(response.encode()) #Python 3
+			connectionSocket.send(response.encode())
 			connectionSocket.close()
 
 		except (IOError, IndexError):
